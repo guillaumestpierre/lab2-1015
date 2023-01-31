@@ -60,11 +60,21 @@ void ajoutFilm(Film* film, Film*& ListeFilms []) {
 		}
 	}
 
-	//Modification de la taille si ListeFilms est pleine et ajout du film
+	//Création d'une nouvelle liste si ListeFilms est pleine et ajout du film
+	// Comment retourner un liste plus grande si c++ ne permet pas de retourner de liste ?
 	if (CompteurFilms == ListeFilms.lenght()) {
-		ListeFilms.resize(CompteurFilms + 1, film);
-		ListeFilms.resize(CompteurFilms * 2);
+		Films* NouvelleListeFilms[];
+		int k = 0;
+		for (Film* filmADeplacer : ListeFilms) {
+			NouvelleListeFilms[k] = filmADeplacer;
+		}
 
+		//Est-ce suffisant pour "supprimer" l'ancienne liste ?
+		ListeFilms.clear();
+
+		NouvelleListeFilms.resize(CompteurFilms + 1, film);
+		NouvelleListeFilms.resize(CompteurFilms * 2);
+		
 	}
 	else
 	{
