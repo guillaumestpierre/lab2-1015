@@ -49,45 +49,34 @@ string lireString(istream& fichier)
 
 #pragma endregion//}
 
+//span pour ListeFilms
+gsl::span spanListeFilms(const ListeFilms& lf) 
+{
+	return gsl::span(lf.elements, lf.nElements);
+}
+
+//span pour les Acteurs
+gsl::span spanListeActeurs(const ListeActeurs& la)
+{
+	return gsl::span(la.elements, la.nElements);
+}
+
 //TODO: Une fonction pour ajouter un Film à une ListeFilms, le film existant déjà; on veut uniquement ajouter le pointeur vers le film existant.  Cette fonction doit doubler la taille du tableau alloué, avec au minimum un élément, dans le cas où la capacité est insuffisante pour ajouter l'élément.  Il faut alors allouer un nouveau tableau plus grand, copier ce qu'il y avait dans l'ancien, et éliminer l'ancien trop petit.  Cette fonction ne doit copier aucun Film ni Acteur, elle doit copier uniquement des pointeurs.
 void ajoutFilm(Film* film, Film*& ListeFilms []) {
 
-	//Vérification que ListeFilms n'est pas pleine
-	int CompteurFilms = 0;
-	for (int i = 0; i < ListeFilms.length(); i++) {
-		if (ListeFilms[i] != nullptr) {
-			CompteurFilms++;
-		}
-	}
-
-	//Création d'une nouvelle liste si ListeFilms est pleine et ajout du film
-	// Comment retourner un liste plus grande si c++ ne permet pas de retourner de liste ?
-	if (CompteurFilms == ListeFilms.lenght()) {
-		Films* NouvelleListeFilms[];
-		int k = 0;
-		for (Film* filmADeplacer : ListeFilms) {
-			NouvelleListeFilms[k] = filmADeplacer;
-		}
-
-		//Est-ce suffisant pour "supprimer" l'ancienne liste ?
-		ListeFilms.clear();
-
-		NouvelleListeFilms.resize(CompteurFilms + 1, film);
-		NouvelleListeFilms.resize(CompteurFilms * 2);
-		
-	}
-	else
-	{
-		ListeFilms.push_back(film);
-	}
+	//Création d'une nouvelle liste si ListeFilms est pleine et ajout du film	
 }
 
 //TODO: Une fonction pour enlever un Film d'une ListeFilms (enlever le pointeur) sans effacer le film; la fonction prenant en paramètre un pointeur vers le film à enlever.  L'ordre des films dans la liste n'a pas à être conservé.
-//Comment est-ce possible de modifier une liste si elle n'est pas passée en paramètre ?
-void retraitFilm(Film* filmRecherché, Film*& ListeFilms[]) {
-	for (Film* film : ListeFilms) {
-		if (filmRecherché == film) {
-			ListeFIlms.remove(film);
+void EnleverFIlm(Films* ListeFilms& lf, Films*& f)
+{
+	for (Films* film : spanListeFilms(lf)) {
+		if (lf.nElements > 1 && film == f) {
+			f = lf.elements[lf.capacite - 1];
+			lf.nElements--;
+		}
+		else if (lf.nElements == 1 && film == f) {
+			lf.nElements--;
 		}
 	}
 }
@@ -135,6 +124,23 @@ ListeFilms creerListe(string nomFichier)
 }
 
 //TODO: Une fonction pour détruire un film (relâcher toute la mémoire associée à ce film, et les acteurs qui ne jouent plus dans aucun films de la collection).  Noter qu'il faut enleve le film détruit des films dans lesquels jouent les acteurs.  Pour fins de débogage, affichez les noms des acteurs lors de leur destruction.
+
+void DétruireFilm(Films*& f) 
+{
+	for (Acteur* acteur : spanListeActeurs(ListeActeurs)) {
+		
+		for (Films** film : spanListeFilms(acteur.joueDans)) {
+			
+			if (acteur.joueDans.nElements > 1 && film == f) {
+				f = acteur.joueDans.elements[acteur.joueDans.capacite - 1];
+				acteur.joueDans.elements--;
+			}
+			else if (acteur.joueDans.nElements == 1 && film == f) {
+				acteur.joueDans.elements--;
+			}
+		}
+	}
+}
 
 //TODO: Une fonction pour détruire une ListeFilms et tous les films qu'elle contient.
 
