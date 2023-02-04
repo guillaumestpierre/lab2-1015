@@ -54,6 +54,9 @@
     <ClInclude Include="structures.hpp" />
     <ClInclude Include="verification_allocation.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="films.bin" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
