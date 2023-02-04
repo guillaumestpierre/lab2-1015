@@ -90,6 +90,19 @@ void EnleverFilm(ListeFilms& lf, Films f)
 }
 
 //TODO: Une fonction pour trouver un Acteur par son nom dans une ListeFilms, qui retourne un pointeur vers l'acteur, ou nullptr si l'acteur n'est pas trouvé.  Devrait utiliser span.
+Acteur* trouverActeur (ListeFilms lf, string nom)
+{
+	Acteur* acteurTrouve = nullptr;
+	for (Films* film : spanListeFilms(lf)) {
+		for (Acteur* acteur : spanListeActeurs(film.ListeActeurs)) {
+			if (acteur->nom == nom) {
+				acteurTrouve = acteur;
+			}
+		}
+	}
+	return acteurTrouve;
+}
+
 
 //TODO: Compléter les fonctions pour lire le fichier et créer/allouer une ListeFilms.  La ListeFilms devra être passée entre les fonctions, pour vérifier l'existence d'un Acteur avant de l'allouer à nouveau (cherché par nom en utilisant la fonction ci-dessus).
 Acteur* lireActeur(istream& fichier)
