@@ -64,14 +64,21 @@ gsl::span spanListeActeurs(const ListeActeurs& la)
 //TODO: Une fonction pour ajouter un Film à une ListeFilms, le film existant déjà; on veut uniquement ajouter le pointeur vers le film existant.  Cette fonction doit doubler la taille du tableau alloué, avec au minimum un élément, dans le cas où la capacité est insuffisante pour ajouter l'élément.  Il faut alors allouer un nouveau tableau plus grand, copier ce qu'il y avait dans l'ancien, et éliminer l'ancien trop petit.  Cette fonction ne doit copier aucun Film ni Acteur, elle doit copier uniquement des pointeurs.
 void ajoutFilm(Film film, ListeFilms& lf []) 
 {
+	Film* filmptr = &film;
 	if (lf.nElements == lf.capacite) {
-
+		Film** nouvelleListe[lf.capacite*2];
+		copy(begin(*lf.elements), end(*lf.elements), begin(nouvelleListe));
+		nouvelleListe.push_back(filmptr);
+		*lf.elements = nouvelleListe;
+		delete[]*lf.elements;
 	}
 	else if (lf.nElements == 0) {
-
+		Film** nouvelleListe[1] = { filmptr };
+		*lf.elements = nouvelleListe;
+		delete[]*lf.elements;
 	}
 	else {
-		lf.elements.push_back(film);
+		*lf.elements.push_back(filmptr);
 	}
 }
 
@@ -93,8 +100,10 @@ void EnleverFilm(ListeFilms& lf, Films f)
 Acteur* trouverActeur (ListeFilms lf, string nom)
 {
 	Acteur* acteurTrouve = nullptr;
-	for (Films* film : spanListeFilms(lf)) {
-		for (Acteur* acteur : spanListeActeurs(film.ListeActeurs)) {
+	for (Films* filmptr : spanListeFilms(lf)) {
+
+		for (Acteur* acteurptr : spanListeActeurs(film.ListeActeurs)) {
+
 			if (acteur->nom == nom) {
 				acteurTrouve = acteur;
 			}
