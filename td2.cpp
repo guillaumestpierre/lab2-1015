@@ -62,20 +62,22 @@ gsl::span spanListeActeurs(const ListeActeurs& la)
 }
 
 //TODO: Une fonction pour ajouter un Film à une ListeFilms, le film existant déjà; on veut uniquement ajouter le pointeur vers le film existant.  Cette fonction doit doubler la taille du tableau alloué, avec au minimum un élément, dans le cas où la capacité est insuffisante pour ajouter l'élément.  Il faut alors allouer un nouveau tableau plus grand, copier ce qu'il y avait dans l'ancien, et éliminer l'ancien trop petit.  Cette fonction ne doit copier aucun Film ni Acteur, elle doit copier uniquement des pointeurs.
-void ajoutFilm(Film film, ListeFilms& lf []) 
+void ajouterFilm(Film film, ListeFilms& lf []) 
 {
 	Film* filmptr = &film;
 	if (lf.nElements == lf.capacite) {
-		Film** nouvelleListe[lf.capacite*2];
+		Film* nouvelleListe[lf.capacite * 2];
+		Film** nouvelleListeptr = &nouvelleListe;
 		copy(begin(*lf.elements), end(*lf.elements), begin(nouvelleListe));
 		nouvelleListe.push_back(filmptr);
-		*lf.elements = nouvelleListe;
 		delete[]*lf.elements;
+		lf.elements = nouvelleListeptr;
 	}
 	else if (lf.nElements == 0) {
-		Film** nouvelleListe[1] = { filmptr };
-		*lf.elements = nouvelleListe;
-		delete[]*lf.elements;
+		Film* nouvelleListe[1] = {filmptr};
+		Film** nouvelleListeptr = &nouvelleListe;
+		delete[] * lf.elements;
+		lf.elements = nouvelleListeptr;
 	}
 	else {
 		*lf.elements.push_back(filmptr);
@@ -83,29 +85,29 @@ void ajoutFilm(Film film, ListeFilms& lf [])
 }
 
 //TODO: Une fonction pour enlever un Film d'une ListeFilms (enlever le pointeur) sans effacer le film; la fonction prenant en paramètre un pointeur vers le film à enlever.  L'ordre des films dans la liste n'a pas à être conservé.
-void EnleverFilm(ListeFilms& lf, Films f)
+void EnleverFilm(ListeFilms& lf, Film f)
 {
-	for (Films* film : spanListeFilms(lf)) {
-		if (lf.nElements > 1 && film == f) {
-			f = lf.elements[lf.capacite - 1];
-			lf.nElements--;
+	for (Film* filmptr : spanListeFilms(lf)) {
+		if (lf.nElements > 1 && *filmptr == f) {
+			filmptr = *lf.elements[lf.capacite - 1];
+			*lf.elements--;
 		}
-		else if (lf.nElements == 1 && film == f) {
-			lf.nElements--;
+		else if (lf.nElements == 1 && *filmptr == f) {
+			*lf.elements--;
 		}
 	}
 }
 
 //TODO: Une fonction pour trouver un Acteur par son nom dans une ListeFilms, qui retourne un pointeur vers l'acteur, ou nullptr si l'acteur n'est pas trouvé.  Devrait utiliser span.
-Acteur* trouverActeur (ListeFilms lf, string nom)
+Acteur* trouverActeur(ListeFilms lf, string nom)
 {
 	Acteur* acteurTrouve = nullptr;
-	for (Films* filmptr : spanListeFilms(lf)) {
+	for (Film* filmptr : spanListeFilms(lf)) {
 
-		for (Acteur* acteurptr : spanListeActeurs(film.ListeActeurs)) {
+		for (Acteur* acteurptr : spanListeActeurs(filmptr->acteurs)) {
 
-			if (acteur->nom == nom) {
-				acteurTrouve = acteur;
+			if (acteurptr->nom == nom) {
+				acteurTrouve = acteurptr;
 			}
 		}
 	}
@@ -154,16 +156,19 @@ ListeFilms creerListe(string nomFichier)
 }
 
 //TODO: Une fonction pour détruire un film (relâcher toute la mémoire associée à ce film, et les acteurs qui ne jouent plus dans aucun films de la collection).  Noter qu'il faut enleve le film détruit des films dans lesquels jouent les acteurs.  Pour fins de débogage, affichez les noms des acteurs lors de leur destruction.
-void DétruireFilm(Films*& f) 
+void détruireFilm(Film filmADetruire) 
 {
-	for (Acteur* acteur : spanListeActeurs(f.acteurs.elements)) {
+	for (Acteur* acteurptr : spanListeActeurs(*filmADetruire.acteurs)) {
 		
-		EnleverFilm(acteur.joueDans, f);
+		for (Film* filmptr : spanListeFilms(acteurptr->joueDans)) {
 
-		if (acteur.joueDans.nElements == 0) {
-			delete[]acteur.joueDans.elements;
+			if (*filmptr == filmADetruire) {
+				EnleverFilm(acteurptr->joueDans, filmADetruire);
+			}
 		}
-		//comment détruire un acteur et non seulement .joueDans.elements ?
+		if (acteurptr->joueDans.nElements == 0) {
+			delete[]*acteurptr.
+		}
 	}
 }
 
