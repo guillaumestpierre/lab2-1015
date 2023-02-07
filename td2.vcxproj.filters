@@ -39,4 +39,9 @@
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="films.bin">
+      <Filter>Fichiers sources</Filter>
+    </None>
+  </ItemGroup>
 </Project>
