@@ -50,13 +50,13 @@ string lireString(istream& fichier)
 #pragma endregion//}
 
 //span pour ListeFilms
-gsl::span spanListeFilms(const ListeFilms& lf) 
+gsl::span<Film*> spanListeFilms(const ListeFilms& lf) 
 {
 	return gsl::span(lf.elements, lf.nElements);
 }
 
 //span pour ListeActeurs
-gsl::span spanListeActeurs(const ListeActeurs& la)
+gsl::span<Acteur*> spanListeActeurs(const ListeActeurs& la)
 {
 	return gsl::span(la.elements, la.nElements);
 }
