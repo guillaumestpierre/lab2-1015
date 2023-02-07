@@ -50,49 +50,58 @@ string lireString(istream& fichier)
 #pragma endregion//}
 
 //TODO: Une fonction pour ajouter un Film à une ListeFilms, le film existant déjà; on veut uniquement ajouter le pointeur vers le film existant.  Cette fonction doit doubler la taille du tableau alloué, avec au minimum un élément, dans le cas où la capacité est insuffisante pour ajouter l'élément.  Il faut alors allouer un nouveau tableau plus grand, copier ce qu'il y avait dans l'ancien, et éliminer l'ancien trop petit.  Cette fonction ne doit copier aucun Film ni Acteur, elle doit copier uniquement des pointeurs.
-void ajoutFilm(Film* film, Film*& ListeFilms []) {
-
-	//Vérification que ListeFilms n'est pas pleine
-	int CompteurFilms = 0;
-	for (int i = 0; i < ListeFilms.length(); i++) {
-		if (ListeFilms[i] != nullptr) {
-			CompteurFilms++;
-		}
+void ajouterFilm(Film film, ListeFilms& lf[])
+{
+	Film* filmptr = &film;
+	if (lf.nElements == lf.capacite) {
+		Film* nouvelleListe[lf.capacite * 2];
+		Film** nouvelleListeptr = &nouvelleListe;
+		copy(begin(*lf.elements), end(*lf.elements), begin(nouvelleListe));
+		nouvelleListe.push_back(filmptr);
+		delete[] * lf.elements;
+		lf.elements = nouvelleListeptr;
 	}
-
-	//Création d'une nouvelle liste si ListeFilms est pleine et ajout du film
-	// Comment retourner un liste plus grande si c++ ne permet pas de retourner de liste ?
-	if (CompteurFilms == ListeFilms.lenght()) {
-		Films* NouvelleListeFilms[];
-		int k = 0;
-		for (Film* filmADeplacer : ListeFilms) {
-			NouvelleListeFilms[k] = filmADeplacer;
-		}
-
-		//Est-ce suffisant pour "supprimer" l'ancienne liste ?
-		ListeFilms.clear();
-
-		NouvelleListeFilms.resize(CompteurFilms + 1, film);
-		NouvelleListeFilms.resize(CompteurFilms * 2);
-		
+	else if (lf.nElements == 0) {
+		Film* nouvelleListe[1] = { filmptr };
+		Film** nouvelleListeptr = &nouvelleListe;
+		delete[] * lf.elements;
+		lf.elements = nouvelleListeptr;
 	}
-	else
-	{
-		ListeFilms.push_back(film);
+	else {
+		*lf.elements.push_back(filmptr);
 	}
 }
 
 //TODO: Une fonction pour enlever un Film d'une ListeFilms (enlever le pointeur) sans effacer le film; la fonction prenant en paramètre un pointeur vers le film à enlever.  L'ordre des films dans la liste n'a pas à être conservé.
-//Comment est-ce possible de modifier une liste si elle n'est pas passée en paramètre ?
-void retraitFilm(Film* filmRecherché, Film*& ListeFilms[]) {
-	for (Film* film : ListeFilms) {
-		if (filmRecherché == film) {
-			ListeFIlms.remove(film);
+void EnleverFilm(ListeFilms& lf, Film f)
+{
+	for (Film* filmptr : spanListeFilms(lf)) {
+		if (lf.nElements > 1 && *filmptr == f) {
+			filmptr = *lf.elements[lf.capacite - 1];
+			*lf.elements--;
+		}
+		else if (lf.nElements == 1 && *filmptr == f) {
+			*lf.elements--;
 		}
 	}
 }
 
 //TODO: Une fonction pour trouver un Acteur par son nom dans une ListeFilms, qui retourne un pointeur vers l'acteur, ou nullptr si l'acteur n'est pas trouvé.  Devrait utiliser span.
+Acteur* trouverActeur(ListeFilms lf, string nom)
+{
+	Acteur* acteurTrouve = nullptr;
+	for (Film* filmptr : spanListeFilms(lf)) {
+
+		for (Acteur* acteurptr : spanListeActeurs(filmptr->acteurs)) {
+
+			if (acteurptr->nom == nom) {
+				acteurTrouve = acteurptr;
+			}
+		}
+	}
+	return acteurTrouve;
+}
+
 
 //TODO: Compléter les fonctions pour lire le fichier et créer/allouer une ListeFilms.  La ListeFilms devra être passée entre les fonctions, pour vérifier l'existence d'un Acteur avant de l'allouer à nouveau (cherché par nom en utilisant la fonction ci-dessus).
 Acteur* lireActeur(istream& fichier)
@@ -135,9 +144,24 @@ ListeFilms creerListe(string nomFichier)
 }
 
 //TODO: Une fonction pour détruire un film (relâcher toute la mémoire associée à ce film, et les acteurs qui ne jouent plus dans aucun films de la collection).  Noter qu'il faut enleve le film détruit des films dans lesquels jouent les acteurs.  Pour fins de débogage, affichez les noms des acteurs lors de leur destruction.
+void détruireFilm(Film filmADetruire)
+{
+	for (Acteur* acteurptr : spanListeActeurs(*filmADetruire.acteurs)) {
+
+		for (Film* filmptr : spanListeFilms(acteurptr->joueDans)) {
+
+			if (*filmptr == filmADetruire) {
+				EnleverFilm(acteurptr->joueDans, filmADetruire);
+			}
+		}
+		if (acteurptr->joueDans.nElements == 0) {
+			delete[] * acteurptr.
+		}
+	}
+}
+
 
 //TODO: Une fonction pour détruire une ListeFilms et tous les films qu'elle contient.
-
 void afficherActeur(const Acteur& acteur)
 {
 	cout << "  " << acteur.nom << ", " << acteur.anneeNaissance << " " << acteur.sexe << endl;
