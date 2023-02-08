@@ -61,13 +61,13 @@ gsl::span<Acteur*> spanListeActeurs(const ListeActeurs la)
 }
 
 //TODO: Une fonction pour ajouter un Film à une ListeFilms, le film existant déjà; on veut uniquement ajouter le pointeur vers le film existant.  Cette fonction doit doubler la taille du tableau alloué, avec au minimum un élément, dans le cas où la capacité est insuffisante pour ajouter l'élément.  Il faut alors allouer un nouveau tableau plus grand, copier ce qu'il y avait dans l'ancien, et éliminer l'ancien trop petit.  Cette fonction ne doit copier aucun Film ni Acteur, elle doit copier uniquement des pointeurs.
-void ajouterFilm(ListeFilms& listeFilms, Film* ptrFilm)
+void ajouterFilm(ListeFilms& listeFilms, Film* filmPtr)
 {
 	//Augmentation de la taille du tableau pour que la moitie des places soient nulles apres la fonction.
 	if (listeFilms.nElements == listeFilms.capacite)
 	{
 		int nouvelleCapacite = listeFilms.nElements + 1 * 2;
-		Film** listeFilmsPtr = new Film* [nouvelleCapacite];//pas besoin de nommée le nouveau tableau ?
+		Film** listeFilmsPtr = new Film* [nouvelleCapacite];
 
 		for (int i = 0; i < listeFilms.nElements; i++)
 		{
@@ -80,7 +80,7 @@ void ajouterFilm(ListeFilms& listeFilms, Film* ptrFilm)
 		listeFilms.elements = listeFilmsPtr;
 		listeFilms.capacite = nouvelleCapacite;
 	}
-	listeFilms.elements[listeFilms.nElements] = ptrFilm;
+	listeFilms.elements[listeFilms.nElements] = filmPtr;
 	listeFilms.nElements++;
 }
 
@@ -92,7 +92,7 @@ void enleverFilm(ListeFilms& listeFilms, Film* filmPtr)
 		if (film == filmPtr)
 		{
 			if (listeFilms.nElements > 1)
-				film = listeFilms.elements[listeFilms.nElements - 1];
+				film = listeFilms.elements[listeFilms.nElements - 1];//la listeFilm aura plusieurs instances du dernier élement, peut-être remplacer la dernière valeur par nullptr à chaque itération ?
 			listeFilms.nElements--;
 		}
 	}
@@ -157,18 +157,19 @@ ListeFilms creerListe(string nomFichier)
 }
 
 //TODO: Une fonction pour détruire un film (relâcher toute la mémoire associée à ce film, et les acteurs qui ne jouent plus dans aucun films de la collection).  Noter qu'il faut enleve le film détruit des films dans lesquels jouent les acteurs.  Pour fins de débogage, affichez les noms des acteurs lors de leur destruction.
-void détruireFilm(Film filmADetruire)
+void détruireFilm(Film* film)
 {
-	for (Acteur* acteurptr : spanListeActeurs(*filmADetruire.acteurs)) {
+	for (Acteur* acteurPtr : spanListeActeurs(film->acteurs.elements[])) {
 
-		for (Film* filmptr : spanListeFilms(acteurptr->joueDans)) {
+		for (Film* filmPtr : spanListeFilms(acteurPtr->joueDans[])) {
 
-			if (*filmptr == filmADetruire) {
-				EnleverFilm(acteurptr->joueDans, filmADetruire);
+			if (filmPtr == film) {
+				enleverFilm(acteurPtr->joueDans[], film);
 			}
 		}
-		if (acteurptr->joueDans.nElements == 0) {
-			delete[] * acteurptr.
+		if (acteurPtr->joueDans.nElements == 0) {
+			delete[] acteurPtr->joueDans.elements;
+			delete acteurPtr;
 		}
 	}
 }
