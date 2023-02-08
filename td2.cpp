@@ -50,44 +50,53 @@ string lireString(istream& fichier)
 
 #pragma endregion//}
 
-//TODO: Une fonction pour ajouter un Film à une ListeFilms, le film existant déjà; on veut uniquement ajouter le pointeur vers le film existant.  Cette fonction doit doubler la taille du tableau alloué, avec au minimum un élément, dans le cas où la capacité est insuffisante pour ajouter l'élément.  Il faut alors allouer un nouveau tableau plus grand, copier ce qu'il y avait dans l'ancien, et éliminer l'ancien trop petit.  Cette fonction ne doit copier aucun Film ni Acteur, elle doit copier uniquement des pointeurs.
-void ajouterFilm(Film film, ListeFilms& lf[])
+gsl::span<Film*> spanListeFilms(const ListeFilms lf) 
 {
-	Film* filmptr = &film;
+	return gsl::span(*lf.elements, lf.nElements);
+}
 
-	
-	if (lf.nElements == lf.capacite) {
-		Film* nouvelleListe[lf.capacite * 2];
-		Film** nouvelleListeptr = &nouvelleListe;
-		copy(begin(*lf.elements), end(*lf.elements), begin(nouvelleListe));
-		nouvelleListe.push_back(filmptr);
-		delete[] * lf.elements;
-		lf.elements = nouvelleListeptr;
+gsl::span<Acteur*> spanListeActeurs(const ListeActeurs la)
+{
+	return gsl::span(*la.elements, la.nElements);
+}
+
+//TODO: Une fonction pour ajouter un Film à une ListeFilms, le film existant déjà; on veut uniquement ajouter le pointeur vers le film existant.  Cette fonction doit doubler la taille du tableau alloué, avec au minimum un élément, dans le cas où la capacité est insuffisante pour ajouter l'élément.  Il faut alors allouer un nouveau tableau plus grand, copier ce qu'il y avait dans l'ancien, et éliminer l'ancien trop petit.  Cette fonction ne doit copier aucun Film ni Acteur, elle doit copier uniquement des pointeurs.
+void ajouterFilm(ListeFilms& listeFilms, Film* ptrFilm)
+{
+	//Augmentation de la taille du tableau pour que la moitie des places soient nulles apres la fonction.
+	if (listeFilms.nElements == listeFilms.capacite)
+	{
+		int nouvelleCapacite = listeFilms.nElements + 1 * 2;
+		Film** listeFilmsPtr = new Film* [nouvelleCapacite];//pas besoin de nommée le nouveau tableau ?
+
+		for (int i = 0; i < listeFilms.nElements; i++)
+		{
+			listeFilmsPtr[i] = listeFilms.elements[i];
+		}
+
+		delete[] listeFilms.elements;
+
+
+		listeFilms.elements = listeFilmsPtr;
+		listeFilms.capacite = nouvelleCapacite;
 	}
-	else if (lf.nElements == 0) {
-		Film* nouvelleListe[1] = { filmptr };
-		Film** nouvelleListeptr = &nouvelleListe;
-		delete[] * lf.elements;
-		lf.elements = nouvelleListeptr;
-	}
-	else {
-		*lf.elements.push_back(filmptr);
-	}
+	listeFilms.elements[listeFilms.nElements] = ptrFilm;
+	listeFilms.nElements++;
 }
 
 //TODO: Une fonction pour enlever un Film d'une ListeFilms (enlever le pointeur) sans effacer le film; la fonction prenant en paramètre un pointeur vers le film à enlever.  L'ordre des films dans la liste n'a pas à être conservé.
-void EnleverFilm(ListeFilms& lf, Film f)
+void enleverFilm(ListeFilms& listeFilms, Film* filmPtr)
 {
-	for (Film* filmptr : spanListeFilms(lf)) {
-
-		if (lf.nElements > 1 && *filmptr == f) {
-			filmptr = *lf.elements[lf.capacite - 1];
-			*lf.elements--;
-		}
-		else if (lf.nElements == 1 && *filmptr == f) {
-			*lf.elements--;
+	for (Film*& film : spanListeFilms(listeFilms))
+	{
+		if (film == filmPtr)
+		{
+			if (listeFilms.nElements > 1)
+				film = listeFilms.elements[listeFilms.nElements - 1];
+			listeFilms.nElements--;
 		}
 	}
+	return;
 }
 
 //TODO: Une fonction pour trouver un Acteur par son nom dans une ListeFilms, qui retourne un pointeur vers l'acteur, ou nullptr si l'acteur n'est pas trouvé.  Devrait utiliser span.
